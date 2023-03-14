@@ -19,6 +19,7 @@
   },
   "plugins": ["react"],
   "rules": {
+    "react/jsx-props-no-spreading": "off",
     "linebreak-style": "off",
     "react/jsx-filename-extension": [
       1,
@@ -30,6 +31,12 @@
       {
         "namedComponents": "arrow-function",
         "unnamedComponents": "arrow-function"
+      }
+    ],
+    "import/extensions": [
+      "warn",
+      {
+        "js": "never"
       }
     ],
     "import/order": [
@@ -51,12 +58,12 @@
             "position": "before"
           },
           {
-            "pattern": "~/app/lib/**",
+            "pattern": "~/src/lib/**",
             "group": "unknown",
             "position": "before"
           },
           {
-            "pattern": "~/app/{components,api,**}/**",
+            "pattern": "~/src/{components,pages}/**",
             "group": "unknown",
             "position": "before"
           }

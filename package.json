@@ -7,16 +7,23 @@
     "build": "next build",
     "start": "next start",
     "prepare": "husky install",
-    "lint": "eslint app --max-warnings=0; eslint pages --max-warnings=3",
-    "lint-staged": "eslint app --max-warnings=0; eslint pages --max-warnings=3"
+    "lint": "eslint src --max-warnings=0",
+    "lint-staged": "eslint src --max-warnings=0"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.17",
+    "@chakra-ui/react": "^2.5.1",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@fontsource/inter": "^4.5.15",
     "@types/node": "18.15.1",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "framer-motion": "^10.3.0",
     "next": "13.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-icons": "^4.8.0",
     "typescript": "*"
   },
   "devDependencies": {
