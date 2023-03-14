@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   Box,
@@ -12,8 +12,11 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import { collectionGroup, doc, getDoc, getDocs } from 'firebase/firestore'
 
-import meetings from '../../lib/constants/meetings'
+import Meeting, { Account } from '~/lib/types/meetings'
+
+import db from '../../../firebase'
 
 import StepList from './StepList'
 
@@ -21,6 +24,38 @@ const tableHeadings: string[] = ['Name', 'Time', 'Account', 'Steps']
 
 const TableSection = () => {
   const [selectedRows, setSelectedRows] = useState(new Set())
+  const [meetings, setMeetings] = useState<Meeting[]>([])
+
+  const colRef = collectionGroup(db, 'meetings')
+
+  useEffect(() => {
+    ;(async () => {
+      const data = await getDocs(colRef)
+      if (data) {
+        const newData: Meeting[] = await Promise.all(
+          data.docs.map(async (i) => {
+            const actualData = await i.data()
+            const account = await getDoc(doc(db, actualData.account.path)).then(
+              (acc) => acc.data() as Account
+            )
+
+            const { name, steps, time } = actualData as Meeting
+
+            return {
+              name,
+              id: i.id,
+              steps,
+              time,
+              account,
+            }
+          })
+        )
+        if (newData) {
+          setMeetings(newData)
+        }
+      }
+    })()
+  }, [])
 
   const allSelected = selectedRows.size === meetings.length
   const isIndeterminate =
@@ -91,10 +126,10 @@ const TableSection = () => {
                   </Text>
                 </Td>
                 <Td borderRightWidth={1} fontWeight={500}>
-                  {meeting.time}
+                  {meeting.name}
                 </Td>
                 <Td borderRightWidth={1} fontWeight={500}>
-                  {meeting.account}
+                  {meeting.account.name}
                 </Td>
                 <Td fontWeight={500}>
                   <StepList steps={meeting.steps} />
