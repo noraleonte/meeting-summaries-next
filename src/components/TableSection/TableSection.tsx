@@ -4,7 +4,6 @@ import {
   Box,
   Checkbox,
   Table,
-  TableContainer,
   Tbody,
   Td,
   Text,
@@ -12,11 +11,13 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
-import { collectionGroup, doc, getDoc, getDocs } from 'firebase/firestore'
+import { format } from 'date-fns'
 
-import Meeting, { Account } from '~/lib/types/meetings'
+import getAllMeetings from '~/lib/firebase/getAllMeetings'
+import Meeting from '~/lib/types/meetings'
 
-import db from '../../../firebase'
+import Paginator from '../Paginator'
+import useSortingOption from '../../lib/hooks/useSortingOption'
 
 import StepList from './StepList'
 
@@ -25,37 +26,28 @@ const tableHeadings: string[] = ['Name', 'Time', 'Account', 'Steps']
 const TableSection = () => {
   const [selectedRows, setSelectedRows] = useState(new Set())
   const [meetings, setMeetings] = useState<Meeting[]>([])
+  const [pageNumber, setPageNumber] = useState<number>(1)
 
-  const colRef = collectionGroup(db, 'meetings')
+  const { selectedSortingOption } = useSortingOption()
+
+  const perPage = 5
 
   useEffect(() => {
     ;(async () => {
-      const data = await getDocs(colRef)
-      if (data) {
-        const newData: Meeting[] = await Promise.all(
-          data.docs.map(async (i) => {
-            const actualData = await i.data()
-            const account = await getDoc(doc(db, actualData.account.path)).then(
-              (acc) => acc.data() as Account
-            )
+      const last =
+        meetings.length > 0 ? meetings[meetings.length - 1].ref : null
+      const meetingCollection = await getAllMeetings(
+        perPage,
+        pageNumber,
+        selectedSortingOption,
+        last
+      )
 
-            const { name, steps, time } = actualData as Meeting
-
-            return {
-              name,
-              id: i.id,
-              steps,
-              time,
-              account,
-            }
-          })
-        )
-        if (newData) {
-          setMeetings(newData)
-        }
+      if (meetingCollection && typeof meetingCollection !== typeof Error) {
+        setMeetings(meetingCollection as Meeting[])
       }
     })()
-  }, [])
+  }, [pageNumber, selectedSortingOption])
 
   const allSelected = selectedRows.size === meetings.length
   const isIndeterminate =
@@ -86,7 +78,11 @@ const TableSection = () => {
 
   return (
     <Box boxShadow="md" borderRadius={4} bg="white">
-      <TableContainer>
+      <Paginator
+        {...{ setPageNumber, pageNumber, perPage }}
+        prevDisabled={pageNumber === 1}
+        nextDisabled={!meetings.length}
+      >
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -108,37 +104,43 @@ const TableSection = () => {
             </Tr>
           </Thead>
           <Tbody fontSize="xs">
-            {meetings.map((meeting) => (
-              <Tr
-                key={meeting.id}
-                bg={selectedRows.has(meeting.id) ? 'cyan.50' : 'white'}
-              >
-                <Td>
-                  <Checkbox
-                    size="sm"
-                    isChecked={selectedRows.has(meeting.id)}
-                    onChange={() => selectIndividualRow(meeting.id)}
-                  />
-                </Td>
-                <Td borderRightWidth={1}>
-                  <Text fontWeight={600} color="cyan.400">
-                    {meeting.name}
-                  </Text>
-                </Td>
-                <Td borderRightWidth={1} fontWeight={500}>
-                  {meeting.name}
-                </Td>
-                <Td borderRightWidth={1} fontWeight={500}>
-                  {meeting.account.name}
-                </Td>
-                <Td fontWeight={500}>
-                  <StepList steps={meeting.steps} />
-                </Td>
-              </Tr>
-            ))}
+            {meetings.length > 0 ? (
+              meetings.map((meeting) => (
+                <Tr
+                  key={meeting.id}
+                  bg={selectedRows.has(meeting.id) ? 'cyan.50' : 'white'}
+                >
+                  <Td>
+                    <Checkbox
+                      size="sm"
+                      isChecked={selectedRows.has(meeting.id)}
+                      onChange={() => selectIndividualRow(meeting.id)}
+                    />
+                  </Td>
+                  <Td borderRightWidth={1}>
+                    <Text fontWeight={600} color="cyan.400">
+                      {meeting.name}
+                    </Text>
+                  </Td>
+                  <Td borderRightWidth={1} fontWeight={500}>
+                    {format(meeting.time as Date, 'PP hh:mm b')}
+                  </Td>
+                  <Td borderRightWidth={1} fontWeight={500}>
+                    {meeting.account.name}
+                  </Td>
+                  <Td fontWeight={500}>
+                    <StepList steps={meeting.steps} />
+                  </Td>
+                </Tr>
+              ))
+            ) : (
+              <Box p={4}>
+                <Text as="b">Nothing to show</Text>
+              </Box>
+            )}
           </Tbody>
         </Table>
-      </TableContainer>
+      </Paginator>
     </Box>
   )
 }

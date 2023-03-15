@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { ListItem, Text, UnorderedList } from '@chakra-ui/react'
+import { Box, ListItem, UnorderedList } from '@chakra-ui/react'
 
 import ShowMoreToggle from './ShowMoreToggle'
 
@@ -11,13 +11,11 @@ const StepList = ({ steps }: PropTypes) => {
   const dataToDisplay = isExpanded ? steps : steps.slice(0, 3)
 
   return (
-    <>
+    <Box>
       <UnorderedList>
         {dataToDisplay.map((step, index) => (
           /* eslint-disable  react/no-array-index-key */
-          <ListItem key={index}>
-            <Text noOfLines={3}>{step}</Text>
-          </ListItem>
+          <ListItem key={index}>{step}</ListItem>
         ))}
       </UnorderedList>
       {steps.length > 3 && (
@@ -28,7 +26,7 @@ const StepList = ({ steps }: PropTypes) => {
           }}
         />
       )}
-    </>
+    </Box>
   )
 }
 

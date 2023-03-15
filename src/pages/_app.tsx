@@ -2,6 +2,8 @@ import type { AppProps } from 'next/app'
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 
+import { SortingOptionProvider } from '~/context/SortingOptionProvider'
+
 const theme = extendTheme({
   styles: {
     global: {
@@ -18,7 +20,9 @@ const theme = extendTheme({
 
 const App = ({ Component, pageProps }: AppProps) => (
   <ChakraProvider {...{ theme }}>
-    <Component {...pageProps} />
+    <SortingOptionProvider>
+      <Component {...pageProps} />
+    </SortingOptionProvider>
   </ChakraProvider>
 )
 export default App

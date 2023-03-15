@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import {
   Box,
   Button,
@@ -8,43 +6,20 @@ import {
   MenuItem,
   MenuList,
 } from '@chakra-ui/react'
-import {
-  FaSortAmountDown,
-  FaSortAmountUp,
-  FaSortAlphaDown,
-} from 'react-icons/fa'
-import { IconType } from 'react-icons'
 
-type PropTypes = {
-  option?: string
-}
+import useSortingOption from '../../../lib/hooks/useSortingOption'
 
-type OptionType = {
-  name: string
-  sortBy: string
-  order?: string
-  icon: IconType
-}
-
-type OptionCollection = { [key: string]: OptionType }
-
-const sortingOptions: OptionCollection = {
-  RECENT: {
-    name: 'Recent',
-    sortBy: 'date',
-    order: 'desc',
-    icon: FaSortAmountDown,
-  },
-  OLDEST: { name: 'Oldest', sortBy: 'date', icon: FaSortAmountUp },
-  ACCOUNT: { name: 'Account (A-Z)', sortBy: 'account', icon: FaSortAlphaDown },
-  NAME: { name: 'Name (A-Z)', sortBy: 'name', icon: FaSortAlphaDown },
-}
-const SortButton = ({ option = 'RECENT' }: PropTypes) => {
-  const [selectedOption, setSelectedOption] = useState(option)
+const SortButton = () => {
+  // const [selectedOption, setSelectedOption] = useState(option)
+  const { dispatch, selectedOption, sortingOptions } = useSortingOption()
 
   const getOptionIcon = (key: string) => {
     const { icon: OptionIcon } = sortingOptions[key]
     return <OptionIcon />
+  }
+
+  const handleOptionSelection = (key: string) => {
+    dispatch({ payload: key })
   }
 
   return (
@@ -64,7 +39,7 @@ const SortButton = ({ option = 'RECENT' }: PropTypes) => {
           <MenuItem
             {...{ key }}
             fontSize="sm"
-            onClick={() => setSelectedOption(key)}
+            onClick={() => handleOptionSelection(key)}
           >
             <Box mr={2}>{getOptionIcon(key)}</Box>
             {sortingOptions[key].name}
