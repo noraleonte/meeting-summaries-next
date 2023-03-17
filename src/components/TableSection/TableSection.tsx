@@ -143,7 +143,7 @@ const TableSection = () => {
                     <Td borderRightWidth={1} fontWeight={500}>
                       {meeting.account.name}
                     </Td>
-                    <Td fontWeight={500}>
+                    <Td fontWeight={500} borderRightWidth={1}>
                       <StepList steps={meeting.steps} />
                     </Td>
                     <Td fontWeight={500}>
