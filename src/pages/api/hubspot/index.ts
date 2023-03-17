@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
+import adminDB from '../../../../firebaseAdmin'
+
 type ResponseType = {
   eventId: string
   subscriptionId: string
@@ -12,13 +14,18 @@ type ResponseType = {
   changeFlag: string
   changeSource: string
   sourceId: string
+  propertyName: string
+  propertyValue: string
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method === 'POST') {
     /* eslint-disable no-console */
     if (req.body) {
-      const event =
+      const event: ResponseType =
         req.body.find(
           (e: ResponseType) => e.subscriptionType === 'company.propertyChange'
         ) ||
@@ -28,8 +35,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       const { subscriptionType } = event
 
       if (subscriptionType === 'company.propertyChange') {
+        const account: { [key: string]: string } = {
+          hubspot_id: event.objectId,
+        }
+
+        account[event.propertyName] = event.propertyValue
+
+        await adminDB.collection('accounts').doc(event.objectId).set(account)
+
         console.log('set/create doc', event)
       } else {
+        const batch = adminDB.batch()
+
+        const accountRef = adminDB.collection('accounts').doc(event.objectId)
+
+        batch.delete(accountRef)
+        batch.commit()
         console.log('delete item', event)
       }
     }
