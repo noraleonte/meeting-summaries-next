@@ -41,13 +41,18 @@ export default async function handler(
 
         account[event.propertyName] = event.propertyValue
 
-        await adminDB.collection('accounts').doc(event.objectId).set(account)
+        await adminDB
+          .collection('accounts')
+          .doc(event.objectId.toString())
+          .set(account)
 
         console.log('set/create doc', event)
       } else {
         const batch = adminDB.batch()
 
-        const accountRef = adminDB.collection('accounts').doc(event.objectId)
+        const accountRef = adminDB
+          .collection('accounts')
+          .doc(event.objectId.toString())
 
         batch.delete(accountRef)
         batch.commit()
