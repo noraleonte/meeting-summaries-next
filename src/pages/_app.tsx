@@ -3,6 +3,9 @@ import type { AppProps } from 'next/app'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 
 import { SortingOptionProvider } from '~/context/SortingOptionProvider'
+import { ActiveFilterProvider } from '~/context/ActiveFilterProvider'
+import { MeetingActionsProvider } from '~/context/MeetingActionsProvider'
+import { InvalidContextProvider } from '~/context/InvalidContextProvider'
 
 const theme = extendTheme({
   styles: {
@@ -21,7 +24,13 @@ const theme = extendTheme({
 const App = ({ Component, pageProps }: AppProps) => (
   <ChakraProvider {...{ theme }}>
     <SortingOptionProvider>
-      <Component {...pageProps} />
+      <ActiveFilterProvider>
+        <MeetingActionsProvider>
+          <InvalidContextProvider>
+            <Component {...pageProps} />
+          </InvalidContextProvider>
+        </MeetingActionsProvider>
+      </ActiveFilterProvider>
     </SortingOptionProvider>
   </ChakraProvider>
 )

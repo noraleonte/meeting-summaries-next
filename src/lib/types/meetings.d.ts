@@ -1,6 +1,15 @@
-import { Timestamp } from 'firebase/firestore'
+import {
+  DocumentData,
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+  Timestamp,
+} from 'firebase/firestore'
 
-export type Account = { hubspot_id: number | string; name: string }
+export type Account = {
+  hubspot_id: number | string
+  name: string
+  ref?: QueryDocumentSnapshot<DocumentData>
+}
 
 type Meeting = {
   id: string

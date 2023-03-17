@@ -52,13 +52,13 @@ const initSortingOptionState: SortingOptionStateType = {
   selectedOption: Object.keys(sortingOptions)[0],
 }
 
-export type ReducerActionType = {
+export type SortingReducerActionType = {
   payload?: string
 }
 
 const reducer = (
   _state: SortingOptionStateType,
-  action: ReducerActionType
+  action: SortingReducerActionType
 ): SortingOptionStateType => {
   if (!action.payload) {
     throw new Error('action.payload is missing!')

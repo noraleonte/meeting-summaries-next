@@ -15,20 +15,29 @@ import { format } from 'date-fns'
 
 import getAllMeetings from '~/lib/firebase/getAllMeetings'
 import Meeting from '~/lib/types/meetings'
+import useSortingOption from '~/lib/hooks/useSortingOption'
+import useActiveFilter from '~/lib/hooks/useActiveFilters'
+import useMeetingActions from '~/lib/hooks/useMeetingActions'
+import useInvalidContext from '~/lib/hooks/useInvalidContext'
 
 import Paginator from '../Paginator'
-import useSortingOption from '../../lib/hooks/useSortingOption'
 
 import StepList from './StepList'
 
 const tableHeadings: string[] = ['Name', 'Time', 'Account', 'Steps']
 
 const TableSection = () => {
-  const [selectedRows, setSelectedRows] = useState(new Set())
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [pageNumber, setPageNumber] = useState<number>(1)
 
   const { selectedSortingOption } = useSortingOption()
+  const { dispatch: changeInvalidContext, invalidContext } = useInvalidContext()
+  const {
+    dispatch,
+    selectedMeetings: selectedRows,
+    REDUCER_ACTION_TYPES,
+  } = useMeetingActions()
+  const { activeFilters } = useActiveFilter()
 
   const perPage = 5
 
@@ -40,6 +49,7 @@ const TableSection = () => {
         perPage,
         pageNumber,
         selectedSortingOption,
+        activeFilters,
         last
       )
 
@@ -47,41 +57,35 @@ const TableSection = () => {
         setMeetings(meetingCollection as Meeting[])
       }
     })()
-  }, [pageNumber, selectedSortingOption])
+
+    if (invalidContext) changeInvalidContext({ payload: false })
+  }, [pageNumber, selectedSortingOption, activeFilters, invalidContext])
 
   const allSelected = selectedRows.size === meetings.length
   const isIndeterminate =
     selectedRows.size > 0 && selectedRows.size !== meetings.length
 
-  const selectIndividualRow = (id: string | number) =>
-    setSelectedRows((prev) => {
-      if (prev.has(id)) {
-        prev.delete(id)
-      } else {
-        prev.add(id)
-      }
-      return new Set(prev)
-    })
+  const selectIndividualRow = (id: string | number) => {
+    dispatch({ type: 'ADD_ONE', payload: id })
+  }
 
-  const selectAllRows = () =>
-    setSelectedRows((previous) => {
-      if (previous.size === meetings.length) {
-        return new Set()
-      }
+  const selectAllRows = () => {
+    let ids: string | number | (string | number)[]
+    if (selectedRows.size === meetings.length) {
+      ids = []
+    } else {
+      ids = meetings.reduce((prev: string[], curr) => [...prev, curr.id], [])
+    }
 
-      const ids: (string | number)[] = meetings.reduce(
-        (prev: string[], curr) => [...prev, curr.id],
-        []
-      )
-      return new Set(ids)
-    })
+    dispatch({ type: REDUCER_ACTION_TYPES.ADD_ARRAY, payload: ids })
+  }
 
   return (
     <Box boxShadow="md" borderRadius={4} bg="white">
       <Paginator
         {...{ setPageNumber, pageNumber, perPage }}
         prevDisabled={pageNumber === 1}
-        nextDisabled={!meetings.length}
+        nextDisabled={!meetings.length || meetings.length < perPage}
       >
         <Table variant="simple">
           <Thead>
@@ -104,7 +108,7 @@ const TableSection = () => {
             </Tr>
           </Thead>
           <Tbody fontSize="xs">
-            {meetings.length > 0 ? (
+            {meetings?.length > 0 &&
               meetings.map((meeting) => (
                 <Tr
                   key={meeting.id}
@@ -132,12 +136,7 @@ const TableSection = () => {
                     <StepList steps={meeting.steps} />
                   </Td>
                 </Tr>
-              ))
-            ) : (
-              <Box p={4}>
-                <Text as="b">Nothing to show</Text>
-              </Box>
-            )}
+              ))}
           </Tbody>
         </Table>
       </Paginator>

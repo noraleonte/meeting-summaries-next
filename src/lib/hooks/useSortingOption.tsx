@@ -4,7 +4,7 @@ import SortingOptionContext, {
   UseSortingOptionContextType,
 } from '../../context/SortingOptionProvider'
 
-const usSortingOption = (): UseSortingOptionContextType =>
+const useSortingOption = (): UseSortingOptionContextType =>
   useContext(SortingOptionContext)
 
-export default usSortingOption
+export default useSortingOption

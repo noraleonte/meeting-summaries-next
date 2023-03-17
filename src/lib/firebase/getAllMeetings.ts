@@ -1,5 +1,5 @@
 import {
-  collectionGroup,
+  collection,
   doc,
   DocumentData,
   DocumentSnapshot,
@@ -9,36 +9,76 @@ import {
   orderBy,
   query,
   startAfter,
+  where,
+  WhereFilterOp,
 } from 'firebase/firestore'
 
+import { FilterCollectionType } from '~/context/ActiveFilterProvider'
 import { SortingOptionType } from '~/context/SortingOptionProvider'
 
 import db from '../../../firebase'
 import Meeting, { Account } from '../types/meetings'
 
-const colRef = collectionGroup(db, 'meetings')
+const colRef = collection(db, 'meetings')
 
 const getAllMeetings = async (
   perPage: number,
   pageNumber: number,
   sortingOption: SortingOptionType,
+  activeFilters: FilterCollectionType,
   last?: DocumentSnapshot<DocumentData> | null
 ): Promise<Meeting[] | Error> => {
+  const queryFilters =
+    activeFilters.length > 0
+      ? activeFilters.map((filter) =>
+          where(
+            filter.key,
+            filter.operator as WhereFilterOp,
+            filter.key === 'account'
+              ? (filter.value as Account[]).map(
+                  (accountObj) => accountObj.ref?.ref
+                )
+              : filter.value
+          )
+        )
+      : []
+
+  const queryOrder =
+    activeFilters.length > 0
+      ? activeFilters
+          .filter((filter) => {
+            const equalityOps = ['==', 'in']
+
+            return (
+              !equalityOps.includes(filter.operator) &&
+              filter.key !== sortingOption.sortBy
+            )
+          })
+          .map((filter) => filter.key)
+          .filter((filter, i, a) => a.indexOf(filter) === i) // only get unique vals
+          .map((filter) => orderBy(filter))
+      : []
+
   try {
     const collections =
       pageNumber !== 1
         ? await getDocs(
             query(
               colRef,
+              ...queryOrder,
               orderBy(sortingOption.sortBy, sortingOption.order),
               startAfter(last),
+              ...queryFilters,
               limit(perPage)
             )
           )
         : await getDocs(
             query(
               colRef,
+              ...queryOrder,
               orderBy(sortingOption.sortBy, sortingOption.order),
+              ...queryFilters,
+
               limit(perPage)
             )
           )

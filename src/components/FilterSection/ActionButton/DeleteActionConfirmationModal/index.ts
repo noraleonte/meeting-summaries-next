@@ -1,0 +1,3 @@
+import DeleteActionConfirmationModal from './DeleteActionConfirmationModal'
+
+export default DeleteActionConfirmationModal

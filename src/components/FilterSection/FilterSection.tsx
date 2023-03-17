@@ -1,6 +1,7 @@
 import { Flex, Spacer } from '@chakra-ui/react'
 
 import ActionButton from './ActionButton'
+import DateFilter from './DateFilter'
 import FilterButton from './FilterButton'
 import SortButton from './SortButton'
 
@@ -13,7 +14,7 @@ const FilterSection = () => (
     <Spacer />
     <Flex gap={2}>
       <SortButton />
-      <ActionButton />
+      <DateFilter />
     </Flex>
   </Flex>
 )
