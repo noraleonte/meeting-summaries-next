@@ -87,9 +87,7 @@ const getAllMeetings = async (
       const updatedCol: Meeting[] = await Promise.all(
         collections.docs.map(async (i) => {
           const actualData = await i.data()
-          const account = await getDoc(doc(db, actualData.account.path)).then(
-            (acc) => acc.data() as Account
-          )
+          const account = await getDoc(doc(db, actualData.account.path))
 
           const { name, steps, time } = actualData
 
@@ -98,7 +96,7 @@ const getAllMeetings = async (
             id: i.id,
             steps,
             time: time.toDate(),
-            account,
+            account: { ...account.data(), ref: account } as Account,
             ref: i,
           }
         })

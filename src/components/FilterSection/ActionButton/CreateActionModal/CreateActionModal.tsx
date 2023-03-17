@@ -27,7 +27,7 @@ import {
 } from '@chakra-ui/react'
 import { BsCursorText, BsFillCalendarCheckFill } from 'react-icons/bs'
 
-import { Account } from '~/lib/types/meetings'
+import Meeting, { Account } from '~/lib/types/meetings'
 import getAllAccounts from '~/lib/firebase/getAllAccounts'
 import createOrUpdateMeeting from '~/lib/firebase/createOrUpdateMeeting'
 import useInvalidContext from '~/lib/hooks/useInvalidContext'
@@ -37,6 +37,7 @@ import AddStepsSection from './AddStepsSection'
 type PropTypes = {
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
+  meeting: Meeting | null
 }
 
 export type FormDataType = {
@@ -54,17 +55,37 @@ type AttrbuteType = 'name' | 'time' | 'steps' | 'account'
 
 const initState: FormDataType = { name: '', time: '', steps: [], account: null }
 
-const CreateActionModal = ({ isOpen = false, setIsOpen }: PropTypes) => {
-  const [formData, setFormData] = useState<FormDataType>(initState)
+const CreateActionModal = ({
+  isOpen = false,
+  setIsOpen,
+  meeting = null,
+}: PropTypes) => {
+  const [formData, setFormData] = useState<FormDataType | Meeting>(
+    meeting || initState
+  )
   const [accounts, setAccounts] = useState<Account[]>([])
 
   const { dispatch: changeInvalidContext } = useInvalidContext()
 
   const getAccountByHubspotId = (id: string | number) =>
-    accounts.find((account) => account.hubspot_id === id)
+    accounts.find((account) => account.hubspot_id.toString() === id.toString())
 
   const isStepsAddDisabled =
     formData.steps.findIndex((step) => !step || !step.length) >= 0
+
+  const getTimeValue = () => {
+    if (formData.time) {
+      if (
+        typeof formData.time === 'function' ||
+        typeof formData.time === 'object'
+      ) {
+        return (formData.time as Date).toISOString().slice(0, -1)
+      }
+      return formData.time as string
+    }
+
+    return ''
+  }
 
   const handleSetAttribute = (attribute: AttrbuteType, value: ValueType) =>
     setFormData((prev) => {
@@ -131,7 +152,7 @@ const CreateActionModal = ({ isOpen = false, setIsOpen }: PropTypes) => {
                   <Input
                     type="datetime-local"
                     placeholder="Meeting time"
-                    value={(formData.time as string) || ''}
+                    value={getTimeValue()}
                     isInvalid={!formData.time}
                     errorBorderColor="crimson"
                     onChange={(e) => handleSetAttribute('time', e.target.value)}
@@ -144,6 +165,9 @@ const CreateActionModal = ({ isOpen = false, setIsOpen }: PropTypes) => {
                 </FormLabel>
                 <Select
                   placeholder="Select option"
+                  value={formData.account?.hubspot_id}
+                  isInvalid={!formData.account}
+                  errorBorderColor="crimson"
                   onChange={(e) =>
                     handleSetAttribute(
                       'account',
@@ -191,7 +215,7 @@ const CreateActionModal = ({ isOpen = false, setIsOpen }: PropTypes) => {
               size="sm"
               colorScheme="cyan"
               mr={3}
-              isDisabled={!formData.name || !formData.time}
+              isDisabled={!formData.name || !formData.time || !formData.account}
             >
               Save
             </Button>

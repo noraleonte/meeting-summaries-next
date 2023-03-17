@@ -40,14 +40,19 @@ const ActionButton = () => {
           </MenuItem>
         </MenuList>
       </Menu>
-      <DeleteActionConfirmationModal
-        isOpen={isDeleteModalOpen}
-        setIsOpen={setIsDeleteModalOpen}
-      />
-      <CreateActionModal
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
-      />
+      {isDeleteModalOpen && (
+        <DeleteActionConfirmationModal
+          isOpen={isDeleteModalOpen}
+          setIsOpen={setIsDeleteModalOpen}
+        />
+      )}
+      {isCreateModalOpen && (
+        <CreateActionModal
+          isOpen={isCreateModalOpen}
+          setIsOpen={setIsCreateModalOpen}
+          meeting={null}
+        />
+      )}
     </>
   )
 }
