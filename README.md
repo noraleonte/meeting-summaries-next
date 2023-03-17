@@ -1,38 +1,21 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Meeting summaries app
 
-## Getting Started
+- meeting data is being retrieved from Firebase
+- UI was developed using Chakra UI
+- the CRM data for each meeting is being synced with the Hubspot API through webhooks (APIs in NextJS provide an easy way to set up this implementation)
 
-First, run the development server:
+## Basic flow
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+- A user can view their meetings, create new meetings or edit meeting records
+- by selecting multiple table rows, the user can delete multiple records
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Future improvements
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+- App state is currently being handled with Context API (handling chunks of state such as selected table rows, selected sorting options, active filters, etc). A future improvement could be the implementation of a state managment tool (more extensive research needed)
+- When the data is mutated, the data fetch is being invalidated (through a custom implementation) - this solution is inefficient on large sets of data, and the implementation of an real-time update solution would be best
+- The use of websockets integrated with the hubspot Webhook API
+- Firestore pagination provides an easy way of breaking data up in chunks, however, not being able to get the total number of records limits the pagination functionality. Researching a better alternative for this would be a significant improvement
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Run the project locally
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+`git clone` & `yarn start`
